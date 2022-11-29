@@ -4,11 +4,12 @@
 <html>
 <head>
 <script src="scripts/main.js"></script>
+<script src="scripts/io.js"></script>
 <meta charset="UTF-8">
 <link rel="stylesheet" type="text/css" href="css/main.css">
-<title>Insert title here</title>
+<title>Asiakkaat</title>
 </head>
-<body>
+<body onload="asetaFocus('hakusana')" onkeydown="tutkiKey(event, 'listaa')">
 <table id="listaus">
 	<thead>
 	

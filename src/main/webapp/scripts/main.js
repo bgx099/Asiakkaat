@@ -5,38 +5,26 @@ function serialize_form(form){
 	        );	
 }
 
-function haeAsiakkaat() {
-	let url = "myynti?hakusana=" + document.getElementById("hakusana").value; 
-	let requestOptions = {
-        method: "GET",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" } 
-    };    
-    fetch(url, requestOptions)
-    .then(response => response.json())//Muutetaan vastausteksti JSON-objektiksi
-    .then(response => printItems(response))
-    .catch(errorText => console.error("Fetch failed: " + errorText));  	
-   
-}
-
-//Kirjoitetaan tiedot taulukkoon JSON-objektilistasta
-function printItems(respObjList){
-	//console.log(respObjList);
-	let htmlStr="";
-	for(let item of respObjList){//yksi kokoelmalooppeista		
-    	htmlStr+="<tr id='rivi_"+item.asiakas_id+"'>";
-    	htmlStr+="<td>"+item.etunimi+"</td>";
-    	htmlStr+="<td>"+item.sukunimi+"</td>";
-    	htmlStr+="<td>"+item.puhelin+"</td>";
-    	htmlStr+="<td>"+item.sposti+"</td>";     	
-    	htmlStr+="<td><span class='poista' onclick=varmistaPoisto("+item.asiakas_id+",'"+encodeURI(item.etunimi)+"')>Poista</span></td>";
-    	htmlStr+="</tr>";    	
-	}
-	document.getElementById("tbody").innerHTML = htmlStr;		
+function requestURLParam(sParam){
+    let sPageURL = window.location.search.substring(1);
+    let sURLVariables = sPageURL.split("&");
+    for (let i = 0; i < sURLVariables.length; i++){
+        let sParameterName = sURLVariables[i].split("=");
+        if(sParameterName[0] == sParam){
+            return sParameterName[1];
+        }
+    }
 }
 
 function tutkiJaLisaa(){
 	if(tutkiTiedot()){
 		lisaaTiedot();
+	}
+}
+
+function tutkiJaPaivita(){
+	if(tutkiTiedot()){
+		paivitaTiedot();
 	}
 }
 
@@ -76,52 +64,28 @@ function siivoa(teksti){
 	return teksti;
 }
 
-function lisaaTiedot(){
-	let formData = serialize_form(document.lomake); //Haetaan tiedot lomakkeelta ja muutetaan JSON-stringiksi
-	//console.log(formData);
-	let url = "myynti";    
-    let requestOptions = {
-        method: "POST", //Lisätään auto
-        headers: { "Content-Type": "application/json" },  
-    	body: formData
-    };    
-    fetch(url, requestOptions)
-    .then(response => response.json())//Muutetaan vastausteksti JSON-objektiksi
-   	.then(responseObj => {	
-   		//console.log(responseObj);
-   		if(responseObj.response==0){
-   			document.getElementById("ilmo").innerHTML = "Asiakkaan lisäys epäonnistui.";	
-        }else if(responseObj.response==1){ 
-        	document.getElementById("ilmo").innerHTML = "Asiakkaan lisäys onnistui.";
-			document.lomake.reset(); //Tyhjennetään auton lisäämisen lomake		        	
-		}
-		setTimeout(function(){ document.getElementById("ilmo").innerHTML=""; }, 3000);
-   	})
-   	.catch(errorText => console.error("Fetch failed: " + errorText));
-}
-
 function varmistaPoisto(asiakas_id, etunimi){
 	if(confirm("Poista asiakas " + decodeURI(etunimi) + "?")){ //decodeURI() muutetaan enkoodatut merkit takaisin normaaliksi kirjoitukseksi
 		poistaAsiakas(asiakas_id, encodeURI(etunimi));
 	}
 }
 
-function poistaAsiakas(asiakas_id, etunimi){
-	let url = "myynti?asiakas_id=" + asiakas_id;    
-    let requestOptions = {
-        method: "DELETE"             
-    };    
-    fetch(url, requestOptions)
-    .then(response => response.json())//Muutetaan vastausteksti JSON-objektiksi
-   	.then(responseObj => {	
-   		//console.log(responseObj);
-   		if(responseObj.response==0){
-			alert("Asiakkaan poisto epäonnistui.");	        	
-        }else if(responseObj.response==1){ 
-			document.getElementById("rivi_"+asiakas_id).style.backgroundColor="red";
-			alert("Asiakkaan " + decodeURI(etunimi) +" poisto onnistui."); //decodeURI() muutetaan enkoodatut merkit takaisin normaaliksi kirjoitukseksi
-			haeAutot();        	
-		}
-   	})
-   	.catch(errorText => console.error("Fetch failed: " + errorText));
+function asetaFocus(target){
+	document.getElementById(target).focus();	
 }
+
+//Funktio Enter-nappiin. Kutsu bodyn onkeydown()-metodista.
+function tutkiKey(event, target){	
+	if(event.keyCode==13){//13=Enter
+		if(target=="listaa"){
+			haeAsiakkaat();
+		}else if(target=="lisaa"){
+			tutkiJaLisaa();
+		}else if(target=="paivita"){
+			tutkiJaPaivita();
+		}
+	}else if(event.keyCode==113){//F2
+		document.location="listaaasiakkaat.jsp";
+	}		
+}
+
