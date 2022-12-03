@@ -41,9 +41,12 @@ public class Myynti extends HttpServlet {
 				asiakkaat = dao.getAllItems(); //Haetaan kaikki autot
 			}
 			strJSON = new Gson().toJson(asiakkaat);	
-		} else if(asiakas_id!=null) {
+		} else if(asiakas_id!=null) { 
 			Asiakas asiakas = dao.getItem(Integer.parseInt(asiakas_id));
 			strJSON = new Gson().toJson(asiakas);
+		} else {
+			asiakkaat = dao.getAllItems(); //Haetaan kaikki autot
+			strJSON = new Gson().toJson(asiakkaat);
 		}
     	
     	response.setContentType("application/json; charset=UTF-8");
